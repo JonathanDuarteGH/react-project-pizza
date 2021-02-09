@@ -10,59 +10,99 @@ app.use(express.json());
 
 // Get All Pizzas
 
-app.get("/api/v1/pizzas", (req, res) => {
-  // console.log("Route Handler to Get All Pizzas is now running")
-  res.status(200).json({
-    status: "success",
-    data: {
-      pizza: ["cheese pizza, pepperoni"],
-    },
-  });
+app.get("/api/v1/pizzas", async (req, res) => {
+
+  try {
+    const results = await db.query("SELECT * FROM pys");
+    console.log(req.params.id);
+    console.log(results);
+    res.status(200).json({
+      status: "success",
+      results: results.rows.length,
+      data: {
+        pizzas: results.rows,
+      },
+    });
+  } catch (error) {
+    console.log(error)
+  }
 });
 
 // Get a Pizza
 
-app.get("/api/v1/pizzas/:id", (req, res) => {
-  console.log(req.params);
+app.get("/api/v1/pizzas/:id", async (req, res) => {
+  console.log(req.params.id);
 
-  res.status(200).json({
-    data: {
-      pizza: "cheese",
-    },
-  });
+  try {
+    const results = await db.query("SELECT * FROM pys WHERE pizza_id = $1", [req.params.id]);
+    console.log(results.rows);
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        pizzas: results.rows[0],
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+
 });
 
 // Create a Pizza
 
-app.post("/api/v1/pizzas", (req, res) => {
+app.post("/api/v1/pizzas", async (req, res) => {
   console.log(req.body);
 
-  res.status(201).json({
-    data: {
-      pizza: "cheese",
-    },
-  });
+  try {
+    const results = await db.query("INSERT INTO pys (_name, _category, _price, _rating, _description) VALUES ($1, $2, $3, $4, $5) RETURNING *", [req.body._name, req.body._category, req.body._price, req.body._rating, req.body._description]);
+    console.log(results);
+    res.status(201).json({
+      data: {
+        pizza: results.rows[0],
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+
 });
 
 // Update Pizzas
 
-app.put("/api/v1/pizzas/:id", (req, res) => {
+app.put("/api/v1/pizzas/:id", async (req, res) => {
   console.log(req.params.id);
   console.log(req.body);
 
-  res.status(200).json({
-    data: {
-      pizza: "cheese",
-    },
-  });
+  try {
+    const results = await db.query("UPDATE pys SET _name = $1, _category = $2, _price = $3, _rating = $4, _description = $5 WHERE pizza_id = $6 RETURNING *", [req.body._name, req.body._category, req.body._price, req.body._rating, req.body._description, req.params.id]);
+    // console.log(results);
+    res.status(200).json({
+      data: {
+        pizza: results.rows[0],
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
 })
 
 // Delete Pizzas
 
-app.delete("/api/v1/pizzas/:id", (req, res) => {
-  res.status(204).json({
-    status: "success",
-  });
+app.delete("/api/v1/pizzas/:id", async (req, res) => {
+
+  try {
+    const results = await db.query("DELETE FROM pys WHERE pizza_id = $1", [req.params.id]);
+    console.log(results)
+    res.status(204).json({
+      status: "success"
+    });
+  } catch (error) {
+    console.log(error)
+  }
 });
 
 const hostname = 'localhost';
