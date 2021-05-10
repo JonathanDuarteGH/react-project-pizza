@@ -6,7 +6,6 @@ const NavBar = () => {
       <h1>Menu</h1>
       <h2>Special</h2>
       <h2>Special2</h2>
-      <h2>Special3</h2>
       <h3>Pie Rewards and Coupons</h3>
     </nav>
   )
